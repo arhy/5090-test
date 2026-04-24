@@ -1,4 +1,10 @@
 import numpy as np
+from pathlib import Path
+
+import matplotlib
+
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
 
 
 def main() -> None:
@@ -55,6 +61,22 @@ def main() -> None:
     print("\nSample predictions:")
     for x_i, y_i, p_i in zip(test_x.flatten(), test_y.flatten(), test_pred.flatten()):
         print(f"x={x_i:>4.1f} target={y_i:.4f} pred={p_i:.4f}")
+
+    out_dir = Path("out")
+    out_dir.mkdir(parents=True, exist_ok=True)
+    out_path = out_dir / "fit_numpy.png"
+
+    plt.figure(figsize=(7, 4))
+    plt.plot(x.flatten(), y.flatten(), label="target y=x^2", linewidth=2)
+    plt.plot(x.flatten(), y_hat.flatten(), label="numpy model", linestyle="--")
+    plt.scatter(test_x.flatten(), test_pred.flatten(), s=20, label="sample preds")
+    plt.title("NumPy NN fit to y=x^2")
+    plt.xlabel("x")
+    plt.ylabel("y")
+    plt.legend()
+    plt.tight_layout()
+    plt.savefig(out_path, dpi=120)
+    print(f"\nSaved plot to {out_path.resolve()}")
 
 
 if __name__ == "__main__":

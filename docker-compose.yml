@@ -1,0 +1,18 @@
+services:
+  nn-numpy:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: nn-x2-test:latest
+    volumes:
+      - ./out:/app/out
+
+  nn-torch:
+    profiles:
+      - torch
+    build:
+      context: .
+      dockerfile: Dockerfile.torch
+    image: nn-x2-torch-test:latest
+    volumes:
+      - ./out:/app/out
