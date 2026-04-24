@@ -25,4 +25,5 @@ services:
 
 volumes:
   results-volume:
+    external: true
     name: ${RESULTS_VOLUME:-DockerVolume}
