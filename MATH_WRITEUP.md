@@ -158,3 +158,90 @@ stateDiagram-v2
     Evaluate --> SavePlot
     SavePlot --> [*]
 ```
+
+## 8. train_torch.py Details
+
+The PyTorch version follows the same regression objective but delegates gradient bookkeeping to autograd.
+
+### 8.1 Data and Targets
+
+The script builds:
+
+$$
+X = \text{linspace}(-1,1,n), \quad
+\epsilon \sim \mathcal{N}(0,\sigma^2), \quad
+Y = X^2 + \epsilon
+$$
+
+where n is NUM_OBS and sigma is NOISE_STD.
+
+### 8.2 Model
+
+In train_torch.py the model is:
+
+$$
+\hat{Y} = W_2\tanh(W_1X + b_1) + b_2
+$$
+
+with hidden width 32 (Linear(1, 32) -> Tanh -> Linear(32, 1)).
+
+### 8.3 Loss and Optimization
+
+Loss:
+
+$$
+\mathcal{L}_{\text{MSE}} = \frac{1}{n}\sum_{i=1}^{n}(\hat{y}_i - y_i)^2
+$$
+
+Optimizer:
+
+- Adam
+- learning rate = 0.02
+- epochs = 3000
+
+At each epoch, train_torch.py does:
+
+1. optimizer.zero_grad()
+2. y_hat = model(x)
+3. loss = MSE(y_hat, y)
+4. loss.backward()
+5. optimizer.step()
+
+### 8.4 Why PyTorch Converges Fast Here
+
+- Automatic differentiation gives exact gradients for this graph.
+- Adam adapts per-parameter step sizes, usually stabilizing early optimization.
+- The target function x^2 is smooth and low dimensional.
+
+### D. train_torch Pipeline Diagram
+
+```mermaid
+flowchart LR
+    D0[Read env NUM_OBS NOISE_STD] --> D1[Build x with torch linspace]
+    D1 --> D2[Sample Gaussian noise]
+    D2 --> D3[Build y equals x squared plus noise]
+    D3 --> D4[Create model Linear Tanh Linear]
+    D4 --> D5[Create Adam optimizer and MSE loss]
+    D5 --> D6[Forward pass]
+    D6 --> D7[Compute loss]
+    D7 --> D8[Backward pass with autograd]
+    D8 --> D9[Optimizer step]
+    D9 --> D10{More epochs?}
+    D10 -- Yes --> D6
+    D10 -- No --> D11[Evaluate on test points]
+    D11 --> D12[Save fit_torch.png]
+```
+
+### E. train_torch Training Sequence
+
+```mermaid
+flowchart TD
+    E1[Epoch start] --> E2[Zero gradients]
+    E2 --> E3[Forward pass]
+    E3 --> E4[Compute MSE loss]
+    E4 --> E5[Backward pass autograd]
+    E5 --> E6[Adam optimizer step]
+    E6 --> E7{More epochs}
+    E7 -- Yes --> E2
+    E7 -- No --> E8[Final evaluation]
+```
