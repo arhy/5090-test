@@ -108,11 +108,11 @@ The script repeats this for 5000 epochs.
 
 ```mermaid
 flowchart TD
-    A[Set hyperparams n, sigma, h, eta, epochs] --> B[Generate x in -1 to 1]
-    B --> C[Sample epsilon ~ N(0,sigma^2)]
-    C --> D[Build targets y = x^2 + epsilon]
-    D --> E[Initialize W1 b1 W2 b2]
-    E --> F[Forward pass z1 tanh y_hat]
+    A[Set hyperparameters] --> B[Generate x in range -1 to 1]
+    B --> C[Sample Gaussian noise]
+    C --> D[Build target y equals x squared plus noise]
+    D --> E[Initialize parameters W1 b1 W2 b2]
+    E --> F[Forward pass]
     F --> G[Compute MSE]
     G --> H[Backprop gradients]
     H --> I[Gradient step]
@@ -120,39 +120,27 @@ flowchart TD
     J -- Yes --> F
     J -- No --> K[Test predictions]
     K --> L[Save fit_numpy.png]
-
-    classDef data fill:#d9f7e8,stroke:#1b5e20,stroke-width:2px;
-    classDef model fill:#e8f0fe,stroke:#0d47a1,stroke-width:2px;
-    classDef train fill:#fff3cd,stroke:#7a4f00,stroke-width:2px;
-    classDef out fill:#fde2e4,stroke:#7f1d1d,stroke-width:2px;
-
-    class B,C,D data;
-    class E,F model;
-    class G,H,I,J train;
-    class K,L out;
 ```
 
 ### B. Computation Graph and Gradient Flow
 
 ```mermaid
-graph LR
-    X[X] --> Z1[Z1 = XW1 + b1]
-    W1[W1] --> Z1
-    b1[b1] --> Z1
-    Z1 --> A1[A1 = tanh(Z1)]
-    A1 --> YH[Y_hat = A1W2 + b2]
-    W2[W2] --> YH
-    b2[b2] --> YH
-    Y[Y] --> L[Loss = mean((Y_hat - Y)^2)]
+flowchart LR
+    X[Input X] --> Z[Linear layer one]
+    W1[Weights W1] --> Z
+    B1[Bias b1] --> Z
+    Z --> A[Tanh activation]
+    A --> YH[Predicted output]
+    W2[Weights W2] --> YH
+    B2[Bias b2] --> YH
+    Y[Target Y] --> L[Mean squared error loss]
     YH --> L
 
-    L -. dL/dY_hat .-> YH
-    YH -. dL/dW2 dL/db2 .-> W2
-    YH -. dL/dW2 dL/db2 .-> b2
-    YH -. dL/dA1 .-> A1
-    A1 -. dL/dZ1 via tanh' .-> Z1
-    Z1 -. dL/dW1 dL/db1 .-> W1
-    Z1 -. dL/dW1 dL/db1 .-> b1
+    L --> G0[Gradient at output]
+    G0 --> G1[Gradients for W2 and b2]
+    G0 --> G2[Gradient at hidden activation]
+    G2 --> G3[Gradient through tanh]
+    G3 --> G4[Gradients for W1 and b1]
 ```
 
 ### C. Training Lifecycle
