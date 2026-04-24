@@ -4,8 +4,11 @@ services:
       context: .
       dockerfile: Dockerfile
     image: nn-x2-test:latest
+    environment:
+      - NOISE_STD=${NOISE_STD:-0.03}
+      - NUM_OBS=${NUM_OBS:-4}
     volumes:
-      - ./out:/app/out
+      - results-volume:/app/out
 
   nn-torch:
     profiles:
@@ -14,5 +17,12 @@ services:
       context: .
       dockerfile: Dockerfile.torch
     image: nn-x2-torch-test:latest
+    environment:
+      - NOISE_STD=${NOISE_STD:-0.03}
+      - NUM_OBS=${NUM_OBS:-4}
     volumes:
-      - ./out:/app/out
+      - results-volume:/app/out
+
+volumes:
+  results-volume:
+    name: ${RESULTS_VOLUME:-DockerVolume}

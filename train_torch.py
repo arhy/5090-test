@@ -1,4 +1,5 @@
 from pathlib import Path
+import os
 
 import matplotlib
 
@@ -9,9 +10,13 @@ import torch
 
 def main() -> None:
     torch.manual_seed(42)
+    num_obs = int(os.getenv("NUM_OBS", "400"))
+    noise_std = float(os.getenv("NOISE_STD", "0.03"))
+    print(f"Using num_obs={num_obs} noise_std={noise_std}")
 
-    x = torch.linspace(-1.0, 1.0, 400).unsqueeze(1)
-    y = x**2
+    x = torch.linspace(-1.0, 1.0, num_obs).unsqueeze(1)
+    noise = noise_std * torch.randn_like(x)
+    y = x**2 + noise
 
     model = torch.nn.Sequential(
         torch.nn.Linear(1, 32),

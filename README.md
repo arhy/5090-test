@@ -26,6 +26,12 @@ On PowerShell, use:
 docker run --rm -v "${PWD}\out:/app/out" nn-x2-test
 ```
 
+With custom noise and number of observations:
+
+```powershell
+docker run --rm -e NOISE_STD=0.05 -e NUM_OBS=800 -v "${PWD}\out:/app/out" nn-x2-test
+```
+
 ## PyTorch Only (Docker)
 
 ```bash
@@ -34,6 +40,25 @@ docker run --rm -v "${PWD}/out:/app/out" nn-x2-torch-test
 ```
 
 ## One Command (Docker Compose)
+
+Store outputs in a named Docker volume:
+
+Set the volume name before running compose.
+
+PowerShell example:
+
+```powershell
+$env:RESULTS_VOLUME="my-existing-volume"
+```
+
+Results are written to `/app/out` inside the container, which maps to that volume.
+
+Tune data settings with env vars (defaults: `NOISE_STD=0.03`, `NUM_OBS=400`):
+
+```powershell
+$env:NOISE_STD="0.05"
+$env:NUM_OBS="800"
+```
 
 NumPy only:
 
@@ -45,6 +70,12 @@ NumPy + PyTorch together:
 
 ```bash
 docker compose --profile torch up --build
+```
+
+Check files in the volume:
+
+```powershell
+docker run --rm -v my-existing-volume:/data alpine ls -lah /data
 ```
 
 You should see training loss decrease and plots written under `out/`:

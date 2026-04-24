@@ -1,4 +1,5 @@
 import numpy as np
+import os
 from pathlib import Path
 
 import matplotlib
@@ -9,10 +10,14 @@ import matplotlib.pyplot as plt
 
 def main() -> None:
     rng = np.random.default_rng(42)
+    num_obs = int(os.getenv("NUM_OBS", "400"))
+    noise_std = float(os.getenv("NOISE_STD", "0.03"))
+    print(f"Using num_obs={num_obs} noise_std={noise_std}")
 
-    # Training data: y = x^2 over [-1, 1]
-    x = np.linspace(-1.0, 1.0, 400, dtype=np.float32).reshape(-1, 1)
-    y = x**2
+    # Training data: y = x^2 + noise over [-1, 1]
+    x = np.linspace(-1.0, 1.0, num_obs, dtype=np.float32).reshape(-1, 1)
+    noise = rng.normal(0.0, noise_std, size=x.shape).astype(np.float32)
+    y = x**2 + noise
 
     # Tiny 1-hidden-layer neural network
     hidden_size = 16
